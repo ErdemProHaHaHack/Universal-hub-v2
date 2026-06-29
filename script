@@ -1,199 +1,182 @@
--- [[ UNIVERSAL HUB v2 - ULTIMATE STABLE ]] --
--- Fixed: Line 48 Error, UI Freeze, Bot-Aimbot, Mobile Support
+-- [[ UNIVERSAL HUB v2 - FLUENT NATIVE ]] --
+-- Integrated: Fluent Key System, Bot-Aimbot, HD Fly, Mobile Toggle
 
--- 1. GÜVENLİ KEY SİSTEMİ (Sistemi Dondurmaz)
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+-- ==========================================
+-- 1. WINDOW & NATIVE KEY SYSTEM
+-- ==========================================
+local Window = Fluent:CreateWindow({
+    Title = "Universal Hub v2",
+    SubTitle = "by AI - Ultra Stable",
+    TabWidth = 160,
+    OptionTips = true,
+    KeySystem = true, -- FLUENT'İN KENDİ KEY SİSTEMİ AKTİF
+    KeySystemTitle = "Universal Hub v2",
+    KeySystemDescription = "Enter the key to unlock the hub",
+    Key = "woahmyuniversalscriptissoopv2" -- BURAYA KEYİ YAZDIK
+})
+
+-- ==========================================
+-- 2. MOBILE TOGGLE ICON (Sürüklenebilir)
+-- ==========================================
 local player = game.Players.LocalPlayer
-local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
-local keyFile = "UniversalHub_v2_Key.txt"
-local verified = false
+local ToggleGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ToggleGui.Name = "FluentMobileToggle"
+ToggleGui.ResetOnSpawn = false
 
-pcall(function()
-    if (readfileexists and readfileexists(keyFile)) or (isfile and isfile(keyFile)) then
-        if readfile(keyFile) == CORRECT_KEY then verified = true end
+local OpenBtn = Instance.new("TextButton", ToggleGui)
+OpenBtn.Size = UDim2.new(0, 50, 0, 50)
+OpenBtn.Position = UDim2.new(0.8, 0, 0.2, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+OpenBtn.Text = "v2"
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+local Stroke = Instance.new("UIStroke", OpenBtn)
+Stroke.Color = Color3.fromRGB(0, 120, 215)
+Stroke.Thickness = 2
+
+-- Mobil Sürükleme Sistemi
+local dragging, dragStart, startPos
+OpenBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = OpenBtn.Position
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+
+-- Fluent Penceresini Aç/Kapat (Sistemle Uyumlu)
+OpenBtn.MouseButton1Click:Connect(function()
+    local fluentGui = player.PlayerGui:FindFirstChild("Fluent") or game:GetService("CoreGui"):FindFirstChild("Fluent")
+    if fluentGui then
+        fluentGui.Enabled = not fluentGui.Enabled
     end
 end)
 
-if not verified then
-    local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-    local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 300, 0, 200); frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 15)
-    Instance.new("UIStroke", frame).Color = Color3.fromRGB(0, 120, 215)
-    
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, 0, 0, 50); title.Text = "UNIVERSAL HUB v2"; title.TextColor3 = Color3.new(1,1,1); title.BackgroundColor3 = Color3.fromRGB(30,30,30); Instance.new("UICorner", title)
-    
-    local input = Instance.new("TextBox", frame)
-    input.Size = UDim2.new(0.8, 0, 0, 40); input.Position = UDim2.new(0.1, 0, 0.35, 0); input.PlaceholderText = "Enter Key..."; input.BackgroundColor3 = Color3.fromRGB(40,40,40); input.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", input)
-    
-    local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(0.8, 0, 0, 40); btn.Position = UDim2.new(0.1, 0, 0.65, 0); btn.Text = "Verify"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215); btn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", btn)
+-- ==========================================
+-- 3. STATE & LOGIC
+-- ==========================================
+local Settings = {
+    Fly = false, Noclip = false, InfJump = false, ESP = false,
+    SpeedH = false, JumpH = false, Aimbot = false,
+    FlySpeed = 50, WalkSpeed = 50, JumpPower = 100
+}
 
-    btn.MouseButton1Click:Connect(function()
-        if input.Text == CORRECT_KEY then
-            pcall(function() writefile(keyFile, CORRECT_KEY) end)
-            btn.Text = "Verified! Loading..."
-            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-            task.wait(1)
-            screenGui:Destroy()
-            verified = true
-            -- Artık rejoin istemiyoruz, anında yükleme yapıyoruz (Donma riskini bitirmek için)
-            loadMainScript() 
-        else
-            btn.Text = "Wrong Key!"; task.wait(1); btn.Text = "Verify"
+local function getChar() return player.Character or player.CharacterAdded:Wait() end
+
+-- Aimbot: Botlar + Oyuncular (360 & Wall Check)
+local function getClosestTarget()
+    local closest, dist = nil, math.huge
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Humanoid") and obj.Parent:FindFirstChild("HumanoidRootPart") then
+            local targetChar = obj.Parent
+            if targetChar ~= getChar() then
+                local pos = targetChar.HumanoidRootPart.Position
+                local mag = (pos - workspace.CurrentCamera.CFrame.Position).Magnitude
+                if mag < dist then
+                    local rp = RaycastParams.new()
+                    rp.FilterDescendantsInstances = {getChar(), targetChar}
+                    rp.FilterType = Enum.RaycastFilterType.Exclude
+                    if not workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (pos - workspace.CurrentCamera.CFrame.Position).Unit * mag, rp) then
+                        dist = mag; closest = targetChar.HumanoidRootPart
+                    end
+                end
+            end
         end
-    end)
-    
-    -- Key sistemi aktifken main script'in çalışmasını engellemek için fonksiyonu sarmalıyoruz
-    function loadMainScript()
-        -- Bu fonksiyon aşağıda tanımlanan ana scripti tetikleyecek
-        _G.RunUniversalHub()
     end
-    return -- Key girilene kadar bekle
+    return closest
 end
 
--- 2. ANA SCRIPT (Fonksiyon şeklinde tanımlandı)
-_G.RunUniversalHub = function()
-    -- Fluent Yükleme
-    local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-    
-    local Window = Fluent:CreateWindow({
-        Title = "Universal Hub v2",
-        SubTitle = "Ultimate Stable Edition",
-        TabWidth = 160,
-        OptionTips = true
-    })
+-- ==========================================
+-- 4. TABS & ELEMENTS
+-- ==========================================
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "user" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
 
-    -- Mobil Açma/Kapama İkonu
-    local ToggleGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-    ToggleGui.Name = "FluentMobileToggle"; ToggleGui.ResetOnSpawn = false
-    local OpenBtn = Instance.new("TextButton", ToggleGui)
-    OpenBtn.Size = UDim2.new(0, 50, 0, 50); OpenBtn.Position = UDim2.new(0.8, 0, 0.2, 0)
-    OpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); OpenBtn.Text = "v2"; OpenBtn.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
-    Instance.new("UIStroke", OpenBtn).Color = Color3.fromRGB(0, 120, 215)
+-- Main Tab
+Tabs.Main:AddToggle("FlyToggle", {Title = "HD Fly (Sert Duruş)", Default = false, Callback = function(v) Settings.Fly = v end})
+Tabs.Main:AddToggle("NoclipToggle", {Title = "Noclip", Default = false, Callback = function(v) Settings.Noclip = v end})
+Tabs.Main:AddToggle("JumpToggle", {Title = "Infinite Jump", Default = false, Callback = function(v) Settings.InfJump = v end})
+Tabs.Main:AddToggle("AimToggle", {Title = "Aimbot 360 (Bots+Players)", Default = false, Callback = function(v) Settings.Aimbot = v end})
+Tabs.Main:AddToggle("ESPToggle", {Title = "Player ESP", Default = false, Callback = function(v) Settings.ESP = v end})
+Tabs.Main:AddToggle("SpeedToggle", {Title = "Enable Speed Hack", Default = false, Callback = function(v) Settings.SpeedH = v end})
+Tabs.Main:AddToggle("JumpToggle2", {Title = "Enable Jump Hack", Default = false, Callback = function(v) Settings.JumpH = v end})
 
-    -- Mobil Sürükleme
-    local dragging, dragStart, startPos
-    OpenBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true; dragStart = input.Position; startPos = OpenBtn.Position
-        end
-    end)
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
-    end)
+-- Settings Tab
+Tabs.Settings:AddSlider("FlyS", {Title = "Fly Speed", Default = 50, Min = 10, Max = 300, Rounding = 1, Callback = function(v) Settings.FlySpeed = v end})
+Tabs.Settings:AddSlider("WalkS", {Title = "Walk Speed", Default = 50, Min = 16, Max = 500, Rounding = 1, Callback = function(v) Settings.WalkSpeed = v end})
+Tabs.Settings:AddSlider("JumpS", {Title = "Jump Power", Default = 100, Min = 50, Max = 1000, Rounding = 1, Callback = function(v) Settings.JumpPower = v end})
 
-    OpenBtn.MouseButton1Click:Connect(function()
-        local fluentGui = player.PlayerGui:FindFirstChild("Fluent") or game:GetService("CoreGui"):FindFirstChild("Fluent")
-        if fluentGui then fluentGui.Enabled = not fluentGui.Enabled end
-    end)
+-- ==========================================
+-- 5. ENGINE (Donma Karşıtı Kalp Atışı)
+-- ==========================================
+task.spawn(function()
+    game:GetService("RunService").Heartbeat:Connect(function()
+        pcall(function()
+            local char = getChar()
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local root = char.HumanoidRootPart
+            local hum = char:FindFirstChildOfClass("Humanoid")
 
-    -- Ayarlar ve State
-    local Settings = {
-        Fly = false, Noclip = false, InfJump = false, ESP = false,
-        SpeedH = false, JumpH = false, Aimbot = false,
-        FlySpeed = 50, WalkSpeed = 50, JumpPower = 100
-    }
+            if Settings.Aimbot then
+                local target = getClosestTarget()
+                if target then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Position) end
+            end
 
-    local Tabs = {
-        Main = Window:AddTab({ Title = "Main", Icon = "user" }),
-        Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-    }
+            if Settings.Fly then
+                local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
+                bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                local bg = root:FindFirstChild("FlyBG") or Instance.new("BodyGyro", root)
+                bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * Settings.FlySpeed
+                bg.CFrame = workspace.CurrentCamera.CFrame
+                hum.PlatformStand = true
+            else
+                if root:FindFirstChild("FlyBV") then root.FlyBV:Destroy() end
+                if root:FindFirstChild("FlyBG") then root.FlyBG:Destroy() end
+                hum.PlatformStand = false
+            end
 
-    -- Main Tab
-    Tabs.Main:AddToggle("FlyT", {Title = "HD Fly (Stiff Pose)", Default = false, Callback = function(v) Settings.Fly = v end})
-    Tabs.Main:AddToggle("NoclipT", {Title = "Noclip", Default = false, Callback = function(v) Settings.Noclip = v end})
-    Tabs.Main:AddToggle("JumpT", {Title = "Infinite Jump", Default = false, Callback = function(v) Settings.InfJump = v end})
-    Tabs.Main:AddToggle("AimT", {Title = "Aimbot (Bots+Players)", Default = false, Callback = function(v) Settings.Aimbot = v end})
-    Tabs.Main:AddToggle("ESPT", {Title = "Player ESP", Default = false, Callback = function(v) Settings.ESP = v end})
-    Tabs.Main:AddToggle("SpeedT", {Title = "Enable Speed Hack", Default = false, Callback = function(v) Settings.SpeedH = v end})
-    Tabs.Main:AddToggle("JumpT2", {Title = "Enable Jump Hack", Default = false, Callback = function(v) Settings.JumpH = v end})
+            hum.WalkSpeed = Settings.SpeedH and Settings.WalkSpeed or 16
+            hum.JumpPower = Settings.JumpH and Settings.JumpPower or 50
+            hum.UseJumpPower = true
 
-    -- Settings Tab
-    Tabs.Settings:AddSlider("FlyS", {Title = "Fly Speed", Default = 50, Min = 10, Max = 300, Rounding = 1, Callback = function(v) Settings.FlySpeed = v end})
-    Tabs.Settings:AddSlider("WalkS", {Title = "Walk Speed", Default = 50, Min = 16, Max = 500, Rounding = 1, Callback = function(v) Settings.WalkSpeed = v end})
-    Tabs.Settings:AddSlider("JumpS", {Title = "Jump Power", Default = 100, Min = 50, Max = 1000, Rounding = 1, Callback = function(v) Settings.JumpPower = v end})
-
-    -- ENGINE (Asenkron & Hata Korumalı)
-    task.spawn(function()
-        game:GetService("RunService").Heartbeat:Connect(function()
-            pcall(function()
-                local char = player.Character
-                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-                local root = char.HumanoidRootPart
-                local hum = char:FindFirstChildOfClass("Humanoid")
-
-                if Settings.Aimbot then
-                    local closest, dist = nil, math.huge
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj:IsA("Humanoid") and obj.Parent:FindFirstChild("HumanoidRootPart") and obj.Parent ~= char then
-                            local pos = obj.Parent.HumanoidRootPart.Position
-                            local mag = (pos - workspace.CurrentCamera.CFrame.Position).Magnitude
-                            if mag < dist then
-                                local rp = RaycastParams.new()
-                                rp.FilterDescendantsInstances = {char, obj.Parent}
-                                if not workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (pos - workspace.CurrentCamera.CFrame.Position).Unit * mag, rp) then
-                                    dist = mag; closest = obj.Parent.HumanoidRootPart
-                                end
-                            end
-                        end
-                    end
-                    if closest then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, closest.Position) end
-                end
-
-                if Settings.Fly then
-                    local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
-                    bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                    local bg = root:FindFirstChild("FlyBG") or Instance.new("BodyGyro", root)
-                    bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-                    bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * Settings.FlySpeed
-                    bg.CFrame = workspace.CurrentCamera.CFrame
-                    hum.PlatformStand = true
-                else
-                    if root:FindFirstChild("FlyBV") then root.FlyBV:Destroy() end
-                    if root:FindFirstChild("FlyBG") then root.FlyBG:Destroy() end
-                    hum.PlatformStand = false
-                end
-
-                hum.WalkSpeed = Settings.SpeedH and Settings.WalkSpeed or 16
-                hum.JumpPower = Settings.JumpH and Settings.JumpPower or 50
-                hum.UseJumpPower = true
-
-                if Settings.Noclip then
-                    for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
-                end
-            end)
+            if Settings.Noclip then
+                for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+            end
         end)
     end)
+end)
 
-    task.spawn(function()
-        while task.wait(1) do
-            pcall(function()
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p ~= player and p.Character then
-                        local hl = p.Character:FindFirstChild("ESP_HL")
-                        if Settings.ESP then
-                            if not hl then hl = Instance.new("Highlight", p.Character); hl.Name = "ESP_HL"; hl.FillColor = Color3.new(1,0,0) end
-                        elseif hl then hl:Destroy() end
-                    end
+-- ESP Loop
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            for _, p in pairs(game.Players:GetPlayers()) do
+                if p ~= player and p.Character then
+                    local hl = p.Character:FindFirstChild("ESP_HL")
+                    if Settings.ESP then
+                        if not hl then hl = Instance.new("Highlight", p.Character); hl.Name = "ESP_HL"; hl.FillColor = Color3.new(1,0,0) end
+                    elseif hl then hl:Destroy() end
                 end
-            end)
-        end
-    end)
+            end
+        end)
+    end
+end)
 
-    game:GetService("UserInputService").JumpRequest:Connect(function()
-        pcall(function() if Settings.InfJump then player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
-    end)
-end
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    pcall(function() if Settings.InfJump then getChar():FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
+end)
 
--- Eğer key önceden doğrulanmışsa direkt başlat
-if verified then
-    _G.RunUniversalHub()
-end
+Window:SelectTab(1)
