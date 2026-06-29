@@ -2,7 +2,6 @@
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 
--- Veritabanı Oluşturma
 local db = Instance.new("Folder", pg)
 db.Name = "HubData_v2"
 
@@ -27,7 +26,6 @@ local keyFile = "UniversalHub_v2_Key.txt"
 local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
 local keyExists = false
 
--- Dosya kontrolü (Executor desteğine göre)
 pcall(function()
     if (readfileexists and readfileexists(keyFile)) or (isfile and isfile(keyFile)) then
         keyExists = true
@@ -40,7 +38,6 @@ if keyExists then
     end)
 end
 
--- Key Ekranı (Sadece doğrulanmamışsa çıkar)
 if not db.Verified.Value then
     local screenGui = Instance.new("ScreenGui", pg)
     local keyFrame = Instance.new("Frame", screenGui)
@@ -65,7 +62,6 @@ if not db.Verified.Value then
             btn.Text = "Success!"
             btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
             task.wait(1)
-            -- İSTEDİĞİN MESAJ
             btn.Text = "Pls rejoin and execute script again"
             btn.Size = UDim2.new(0.9, 0, 0, 30)
             btn.Position = UDim2.new(0.05, 0, 0.65, 0)
@@ -75,7 +71,6 @@ if not db.Verified.Value then
             btn.Text = "Wrong Key!"; task.wait(1); btn.Text = "Verify"
         end
     end)
-    -- Key girilmeden diğer partlar çalışmasın diye scripti burada durduruyoruz
     return 
 end
 -- [[ PART 2: MODERN UI & FULLSCREEN ]] --
@@ -87,16 +82,14 @@ if not db.Verified.Value then return end
 
 local screenGui = Instance.new("ScreenGui", pg)
 screenGui.Name = "MainGui_v2"
-screenGui.ResetOnSpawn = false
+screenGui.ResetOnSpawn = false -- ÖLÜNCE GİTMEZ
 
--- Hareketli İkon (Mobile + PC)
 local icon = Instance.new("TextButton", screenGui)
 icon.Size = UDim2.new(0, 50, 0, 50); icon.Position = UDim2.new(0.1, 0, 0.1, 0); icon.Text = "v2"
 icon.BackgroundColor3 = Color3.fromRGB(30, 30, 30); icon.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
 Instance.new("UIStroke", icon).Color = Color3.fromRGB(0, 120, 215)
 
--- Gelişmiş Sürükleme Sistemi
 local dragging, dragInput, dragStart, startPos
 icon.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -113,7 +106,6 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- Ana Panel
 local main = Instance.new("Frame", screenGui)
 main.Size = UDim2.new(0, 250, 0, 400)
 main.Position = UDim2.new(0.5, -125, 0.5, -200)
@@ -125,7 +117,6 @@ Instance.new("UIStroke", main).Color = Color3.fromRGB(40, 40, 40)
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 40); title.Text = "Universal Hub v2"; title.TextColor3 = Color3.new(1,1,1); title.BackgroundColor3 = Color3.fromRGB(30,30,30); Instance.new("UICorner", title)
 
--- Tam Ekran Tuşu
 local fullBtn = Instance.new("TextButton", main)
 fullBtn.Size = UDim2.new(0, 30, 0, 30); fullBtn.Position = UDim2.new(1, -35, 0, 5); fullBtn.Text = "□"; fullBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); fullBtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", fullBtn)
 
@@ -145,7 +136,6 @@ local scroll = Instance.new("ScrollingFrame", main)
 scroll.Size = UDim2.new(1, -20, 1, -60); scroll.Position = UDim2.new(0, 10, 0, 50); scroll.CanvasSize = UDim2.new(0, 0, 2, 0); scroll.BackgroundTransparency = 1
 Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 7)
 
--- UI Helper Fonksiyonları
 _G.AddToggle = function(text, valName)
     local btn = Instance.new("TextButton", scroll)
     btn.Size = UDim2.new(1, 0, 0, 35); btn.Text = text .. ": OFF"; btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); btn.TextColor3 = Color3.new(1, 1, 1)
@@ -163,7 +153,7 @@ _G.AddInput = function(text, valName)
     local i = Instance.new("TextBox", f); i.Size = UDim2.new(0.4, 0, 0.8, 0); i.Position = UDim2.new(0.5, 0, 0.1, 0); i.Text = tostring(db[valName].Value); i.BackgroundColor3 = Color3.fromRGB(40, 40, 40); i.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", i)
     i.FocusLost:Connect(function() db[valName].Value = tonumber(i.Text) or db[valName].Value end)
 end
--- [[ PART 3: ENGINE & HD-FLY ]] --
+-- [[ PART 3: RESET-PROOF ENGINE ]] --
 local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local pg = player:WaitForChild("PlayerGui")
@@ -181,7 +171,7 @@ _G.AddToggle("Speed Hack", "SpeedHack")
 _G.AddToggle("Jump Hack", "JumpHack")
 _G.AddToggle("Aimbot 360", "Aimbot")
 
--- AIMBOT 360 & WALL CHECK
+-- AIMBOT (Reset-Proof)
 local function getClosestPlayer()
     local closest, dist = nil, math.huge
     for _, p in pairs(game.Players:GetPlayers()) do
@@ -201,10 +191,14 @@ local function getClosestPlayer()
     return closest
 end
 
--- ANA LOOP
+-- ANA LOOP (Sürekli Karakter Kontrolü Yapar)
 RunService.RenderStepped:Connect(function()
     local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChildOfClass("Humanoid") then 
+        -- Karakter yoksa veya henüz yüklenmemişse işlem yapma, hata verme.
+        return 
+    end
+    
     local root = char.HumanoidRootPart
     local hum = char:FindFirstChildOfClass("Humanoid")
 
@@ -214,7 +208,7 @@ RunService.RenderStepped:Connect(function()
         if target then camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.HumanoidRootPart.Position) end
     end
 
-    -- HD FLY (KASKATI DURUŞ & KAMERA DÖNÜŞÜ)
+    -- HD FLY (Kaskatı Duruş)
     if db.IsFlying.Value then
         local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
         bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
@@ -223,14 +217,14 @@ RunService.RenderStepped:Connect(function()
         
         bv.Velocity = camera.CFrame.LookVector * db.FlySpeed.Value
         bg.CFrame = camera.CFrame
-        hum.PlatformStand = true -- Elleri aşağı indirir, kaskatı yapar
+        hum.PlatformStand = true
     else
         if root:FindFirstChild("FlyBV") then root.FlyBV:Destroy() end
         if root:FindFirstChild("FlyBG") then root.FlyBG:Destroy() end
         hum.PlatformStand = false
     end
 
-    -- SPEED & JUMP
+    -- SPEED & JUMP (Anlık Uygulama)
     hum.WalkSpeed = db.SpeedHack.Value and db.WalkSpeed.Value or 16
     hum.JumpPower = db.JumpHack.Value and db.JumpPower.Value or 50
     hum.UseJumpPower = true
@@ -241,7 +235,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ESP (Optimization)
+-- ESP (Ölünce silinmemesi için loop)
 task.spawn(function()
     while task.wait(1) do
         for _, p in pairs(game.Players:GetPlayers()) do
@@ -259,5 +253,8 @@ task.spawn(function()
 end)
 
 game:GetService("UserInputService").JumpRequest:Connect(function()
-    if db.InfJump.Value then player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
+    local char = player.Character
+    if char and db.InfJump.Value then 
+        char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") 
+    end
 end)
