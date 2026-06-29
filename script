@@ -1,13 +1,11 @@
--- [[ PART 1: DATABASE & KEY SYSTEM ]] --
+-- [[ PART 1: DATA & PERSISTENT KEY ]] --
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 
--- Create Hidden Database (Replacement for _G)
-local db = Instance.new("Folder")
+-- Create Hidden Database
+local db = Instance.new("Folder", pg)
 db.Name = "HubData_v2"
-db.Parent = pg
 
--- Database Values
 local function createVal(class, name, val)
     local v = Instance.new(class)
     v.Name = name
@@ -20,219 +18,268 @@ createVal("BoolValue", "IsFlying", false)
 createVal("BoolValue", "Noclip", false)
 createVal("BoolValue", "InfJump", false)
 createVal("BoolValue", "ESP", false)
+createVal("BoolValue", "SpeedHack", false)
+createVal("BoolValue", "JumpHack", false)
+createVal("BoolValue", "Aimbot", false)
 createVal("NumberValue", "FlySpeed", 50)
-createVal("NumberValue", "WalkSpeed", 16)
-createVal("NumberValue", "JumpPower", 50)
+createVal("NumberValue", "WalkSpeed", 50)
+createVal("NumberValue", "JumpPower", 100)
 
--- Key UI
-local screenGui = Instance.new("ScreenGui", pg)
-screenGui.Name = "KeyGui_v2"
+-- KEY PERSISTENCE SYSTEM
+local keyFile = "UniversalHub_v2_Key.txt"
+local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
 
-local keyFrame = Instance.new("Frame", screenGui)
-keyFrame.Size = UDim2.new(0, 260, 0, 160)
-keyFrame.Position = UDim2.new(0.5, -130, 0.5, -80)
-keyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-keyFrame.BorderSizePixel = 0
-
-local keyTitle = Instance.new("TextLabel", keyFrame)
-keyTitle.Size = UDim2.new(1, 0, 0, 40)
-keyTitle.Text = "UNIVERSAL HUB v2 - KEY"
-keyTitle.TextColor3 = Color3.new(1, 1, 1)
-keyTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-
-local keyInput = Instance.new("TextBox", keyFrame)
-keyInput.Size = UDim2.new(0.8, 0, 0, 35)
-keyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
-keyInput.PlaceholderText = "Enter Key..."
-keyInput.Text = ""
-keyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-keyInput.TextColor3 = Color3.new(1, 1, 1)
-
-local verifyBtn = Instance.new("TextButton", keyFrame)
-verifyBtn.Size = UDim2.new(0.8, 0, 0, 35)
-verifyBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
-verifyBtn.Text = "Verify"
-verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-verifyBtn.TextColor3 = Color3.new(1, 1, 1)
-
-verifyBtn.MouseButton1Click:Connect(function()
-    if keyInput.Text == "woahmyuniversalscriptissoopv2" then
+if readfileexists(keyFile) then
+    local savedKey = readfile(keyFile)
+    if savedKey == CORRECT_KEY then
         db.Verified.Value = true
-        keyFrame:Destroy()
-        screenGui:Destroy()
-        print("Verified! Now execute Part 2.")
-    else
-        verifyBtn.Text = "Wrong Key!"
-        task.wait(1)
-        verifyBtn.Text = "Verify"
     end
-end)
--- [[ PART 2: MAIN GUI & SETTINGS ]] --
+end
+
+if not db.Verified.Value then
+    local screenGui = Instance.new("ScreenGui", pg)
+    local keyFrame = Instance.new("Frame", screenGui)
+    keyFrame.Size = UDim2.new(0, 280, 0, 180)
+    keyFrame.Position = UDim2.new(0.5, -140, 0.5, -90)
+    keyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Instance.new("UICorner", keyFrame).CornerRadius = UDim.new(0, 10)
+
+    local title = Instance.new("TextLabel", keyFrame)
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Text = "UNIVERSAL HUB v2 - ACCESS"
+    title.TextColor3 = Color3.new(1, 1, 1)
+    title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    Instance.new("UICorner", title)
+
+    local input = Instance.new("TextBox", keyFrame)
+    input.Size = UDim2.new(0.8, 0, 0, 40)
+    input.Position = UDim2.new(0.1, 0, 0.35, 0)
+    input.PlaceholderText = "Enter Key..."
+    input.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    input.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", input)
+
+    local btn = Instance.new("TextButton", keyFrame)
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Position = UDim2.new(0.1, 0, 0.65, 0)
+    btn.Text = "Verify"
+    btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", btn)
+
+    btn.MouseButton1Click:Connect(function()
+        if input.Text == CORRECT_KEY then
+            writefile(keyFile, CORRECT_KEY)
+            db.Verified.Value = true
+            screenGui:Destroy()
+        else
+            btn.Text = "Wrong Key!"
+            task.wait(1)
+            btn.Text = "Verify"
+        end
+    end)
+end
+-- [[ PART 2: MODERN UI & DRAGGABLE ICON ]] --
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 local db = pg:WaitForChild("HubData_v2")
 
-if not db.Verified.Value then print("Please verify key in Part 1 first!") return end
+if not db.Verified.Value then return end
 
 local screenGui = Instance.new("ScreenGui", pg)
 screenGui.Name = "MainGui_v2"
 screenGui.ResetOnSpawn = false
 
--- Main Frame
-local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 220, 0, 380)
-mainFrame.Position = UDim2.new(0.8, 0, 0.2, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.Active = true
-mainFrame.Draggable = true
+-- DRAGGABLE ICON
+local icon = Instance.new("TextButton", screenGui)
+icon.Size = UDim2.new(0, 50, 0, 50)
+icon.Position = UDim2.new(0.1, 0, 0.1, 0)
+icon.Text = "v2"
+icon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+icon.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", icon).Color = Color3.fromRGB(0, 120, 215)
 
-local mainTitle = Instance.new("TextLabel", mainFrame)
-mainTitle.Size = UDim2.new(1, 0, 0, 40)
-mainTitle.Text = "Universal Hub v2"
-mainTitle.TextColor3 = Color3.new(1, 1, 1)
-mainTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+-- Dragging Logic for Icon
+local dragging, dragInput, dragStart, startPos
+icon.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = icon.Position
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        icon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
 
--- Minimize/Maximize Logic
-local minBtn = Instance.new("TextButton", mainFrame)
-minBtn.Size = UDim2.new(0, 30, 0, 30)
-minBtn.Position = UDim2.new(1, -35, 0, 5)
-minBtn.Text = "-"
-minBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-minBtn.TextColor3 = Color3.new(1, 1, 1)
+-- MAIN FRAME
+local main = Instance.new("Frame", screenGui)
+main.Size = UDim2.new(0, 230, 0, 400)
+main.Position = UDim2.new(0.5, -115, 0.5, -200)
+main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+main.Visible = false
+Instance.new("UICorner", main)
 
-local openIcon = Instance.new("TextButton", screenGui)
-openIcon.Size = UDim2.new(0, 50, 0, 50)
-openIcon.Position = UDim2.new(0.8, 0, 0.2, 0)
-openIcon.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-openIcon.Text = "UH v2"
-openIcon.TextColor3 = Color3.new(1, 1, 1)
-openIcon.Visible = false
-Instance.new("UICorner", openIcon).CornerRadius = UDim.new(1, 0)
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "Universal Hub v2"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", title)
 
-minBtn.MouseButton1Click:Connect(function() mainFrame.Visible = false openIcon.Visible = true end)
-openIcon.MouseButton1Click:Connect(function() mainFrame.Visible = true openIcon.Visible = false end)
+local close = Instance.new("TextButton", main)
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -35, 0, 5)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+close.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", close)
 
-local scroll = Instance.new("ScrollingFrame", mainFrame)
-scroll.Size = UDim2.new(1, 0, 1, -45)
-scroll.Position = UDim2.new(0, 0, 0, 45)
+icon.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
+close.MouseButton1Click:Connect(function() main.Visible = false end)
+
+local scroll = Instance.new("ScrollingFrame", main)
+scroll.Size = UDim2.new(1, -10, 1, -50)
+scroll.Position = UDim2.new(0, 5, 0, 45)
 scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
-scroll.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-scroll.BorderSizePixel = 0
+scroll.BackgroundTransparency = 1
+Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 5)
 
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 8)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- Speed Input Function
-local function createInput(text, valName)
-    local container = Instance.new("Frame", scroll)
-    container.Size = UDim2.new(0.9, 0, 0, 40)
-    container.BackgroundTransparency = 1
-    local label = Instance.new("TextLabel", container)
-    label.Size = UDim2.new(0.5, 0, 1, 0)
-    label.Text = text
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.BackgroundTransparency = 1
-    local input = Instance.new("TextBox", container)
-    input.Size = UDim2.new(0.4, 0, 0.8, 0)
-    input.Position = UDim2.new(0.5, 0, 0.1, 0)
-    input.Text = tostring(db[valName].Value)
-    input.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    input.TextColor3 = Color3.new(1, 1, 1)
-    input.FocusLost:Connect(function() db[valName].Value = tonumber(input.Text) or db[valName].Value end)
-end
-
-createInput("Fly Speed:", "FlySpeed")
-createInput("Walk Speed:", "WalkSpeed")
-createInput("Jump Power:", "JumpPower")
-
--- Create button helper for Part 3
-_G.AddHubBtn = function(text, callback)
+-- UI Helpers
+_G.AddToggle = function(text, valName)
     local btn = Instance.new("TextButton", scroll)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.Text = text .. ": OFF"
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.MouseButton1Click:Connect(callback)
+    Instance.new("UICorner", btn)
+    btn.MouseButton1Click:Connect(function()
+        db[valName].Value = not db[valName].Value
+        btn.Text = text .. (db[valName].Value and ": ON" or ": OFF")
+        btn.BackgroundColor3 = db[valName].Value and Color3.fromRGB(0, 120, 215) or Color3.fromRGB(40, 40, 40)
+    end)
 end
--- [[ PART 3: ENGINE LOGIC ]] --
+
+_G.AddInput = function(text, valName)
+    local f = Instance.new("Frame", scroll)
+    f.Size = UDim2.new(1, 0, 0, 35)
+    f.BackgroundTransparency = 1
+    local l = Instance.new("TextLabel", f)
+    l.Size = UDim2.new(0.5, 0, 1, 0)
+    l.Text = text
+    l.TextColor3 = Color3.new(1, 1, 1)
+    l.BackgroundTransparency = 1
+    local i = Instance.new("TextBox", f)
+    i.Size = UDim2.new(0.4, 0, 0.8, 0)
+    i.Position = UDim2.new(0.5, 0, 0.1, 0)
+    i.Text = tostring(db[valName].Value)
+    i.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    i.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", i)
+    i.FocusLost:Connect(function() db[valName].Value = tonumber(i.Text) or db[valName].Value end)
+end
+-- [[ PART 3: THE ENGINE ]] --
 local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
 local pg = player:WaitForChild("PlayerGui")
 local db = pg:WaitForChild("HubData_v2")
-local RunService = game:GetService("RunService")
 
-if not _G.AddHubBtn then print("Execute Part 2 first!") return end
+-- UI Elements
+_G.AddInput("Fly Speed:", "FlySpeed")
+_G.AddInput("Walk Speed:", "WalkSpeed")
+_G.AddInput("Jump Power:", "JumpPower")
+_G.AddToggle("Fly Hack", "IsFlying")
+_G.AddToggle("Noclip", "Noclip")
+_G.AddToggle("Inf Jump", "InfJump")
+_G.AddToggle("ESP", "ESP")
+_G.AddToggle("Speed Hack", "SpeedHack")
+_G.AddToggle("Jump Hack", "JumpHack")
+_G.AddToggle("Aimbot 360", "Aimbot")
 
--- 1. Fly Toggle
-_G.AddHubBtn("Fly (Toggle)", function()
-    db.IsFlying.Value = not db.IsFlying.Value
+-- AimbOT Logic (360 + Wall Check)
+local function getClosestPlayer()
+    local closest, dist = nil, math.huge
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = p.Character.HumanoidRootPart.Position
+            local magnitude = (pos - player.Character.HumanoidRootPart.Position).Magnitude
+            if magnitude < dist then
+                -- WALL CHECK (Raycast)
+                local rayParams = RaycastParams.new()
+                rayParams.FilterDescendantsInstances = {player.Character, p.Character}
+                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                
+                local result = workspace:Raycast(camera.CFrame.Position, (pos - camera.CFrame.Position).Unit * magnitude, rayParams)
+                if not result then -- No wall in between
+                    dist = magnitude
+                    closest = p
+                end
+            end
+        end
+    end
+    return closest
+end
+
+-- Main Loop
+RunService.RenderStepped:Connect(function()
     local char = player.Character
-    if not char then return end
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+
+    -- Aimbot Logic
+    if db.Aimbot.Value then
+        local target = getClosestPlayer()
+        if target and target.Character then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+        end
+    end
+
+    -- Fly Logic
     if db.IsFlying.Value then
-        local bv = Instance.new("BodyVelocity", char.HumanoidRootPart)
+        local root = char.HumanoidRootPart
+        local bv = root:FindFirstChild("FlyBV") or Instance.new("BodyVelocity", root)
         bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        local bg = Instance.new("BodyGyro", char.HumanoidRootPart)
+        local bg = root:FindFirstChild("FlyBG") or Instance.new("BodyGyro", root)
         bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        char.Humanoid.PlatformStand = true
+        bv.Velocity = camera.CFrame.LookVector * db.FlySpeed.Value
+        bg.CFrame = camera.CFrame
+        hum.PlatformStand = true
     else
         if char.HumanoidRootPart:FindFirstChild("FlyBV") then char.HumanoidRootPart.FlyBV:Destroy() end
         if char.HumanoidRootPart:FindFirstChild("FlyBG") then char.HumanoidRootPart.FlyBG:Destroy() end
-        char.Humanoid.PlatformStand = false
+        hum.PlatformStand = false
     end
-end)
 
--- 2. Noclip Toggle
-_G.AddHubBtn("Noclip (Toggle)", function() db.Noclip.Value = not db.Noclip.Value end)
+    -- Speed/Jump Hacks
+    hum.WalkSpeed = db.SpeedHack.Value and db.WalkSpeed.Value or 16
+    hum.JumpPower = db.JumpHack.Value and db.JumpPower.Value or 50
+    hum.UseJumpPower = true
 
--- 3. Inf Jump Toggle
-_G.AddHubBtn("Inf Jump (Toggle)", function() db.InfJump.Value = not db.InfJump.Value end)
-
--- 4. ESP Toggle
-_G.AddHubBtn("ESP (Toggle)", function()
-    db.ESP.Value = not db.ESP.Value
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            if db.ESP.Value then Instance.new("Highlight", p.Character).FillColor = Color3.new(1,0,0)
-            else for _, v in pairs(p.Character:GetChildren()) do if v:IsA("Highlight") then v:Destroy() end end end
-        end
-    end
-end)
-
--- 5. WalkSpeed Applier
-_G.AddHubBtn("Apply WalkSpeed", function() player.Character.Humanoid.WalkSpeed = db.WalkSpeed.Value end)
-
--- 6. JumpPower Applier
-_G.AddHubBtn("Apply JumpPower", function() 
-    player.Character.Humanoid.UseJumpPower = true
-    player.Character.Humanoid.JumpPower = db.JumpPower.Value 
-end)
-
--- 7. Low Gravity
-_G.AddHubBtn("Low Gravity", function() workspace.Gravity = 50 end)
-
--- 8. Normal Gravity
-_G.AddHubBtn("Normal Gravity", function() workspace.Gravity = 196.2 end)
-
--- 9. Fullbright
-_G.AddHubBtn("Fullbright", function() game.Lighting.Brightness = 2 game.Lighting.ClockTime = 14 end)
-
--- 10. Wide FOV
-_G.AddHubBtn("Wide FOV", function() workspace.CurrentCamera.FieldOfView = 100 end)
-
--- Loops
-RunService.RenderStepped:Connect(function()
-    local char = player.Character
-    if not char then return end
-    if db.IsFlying.Value then
-        local bv = char.HumanoidRootPart:FindFirstChild("FlyBV")
-        local bg = char.HumanoidRootPart:FindFirstChild("FlyBG")
-        if bv and bg then
-            bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * db.FlySpeed.Value
-            bg.CFrame = workspace.CurrentCamera.CFrame
-        end
-    end
+    -- Noclip
     if db.Noclip.Value then
         for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+    end
+end)
+
+-- ESP Loop (Fixed Memory Leak)
+task.spawn(function()
+    while task.wait(1) do
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= player and p.Character then
+                local high = p.Character:FindFirstChild("ESP_HL")
+                if db.ESP.Value then
+                    if not high then
+                        high = Instance.new("Highlight", p.Character)
+                        high.Name = "ESP_HL"; high.FillColor = Color3.new(1,0,0)
+                    end
+                elseif high then high:Destroy() end
+            end
+        end
     end
 end)
 
