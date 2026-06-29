@@ -1,4 +1,4 @@
--- [[ PART 1: DATA & PERSISTENT KEY ]] --
+-- [[ PART 1: DATA & UNIVERSAL KEY SYSTEM - BUG FIXED ]] --
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 
@@ -25,19 +25,34 @@ createVal("NumberValue", "FlySpeed", 50)
 createVal("NumberValue", "WalkSpeed", 50)
 createVal("NumberValue", "JumpPower", 100)
 
--- KEY PERSISTENCE SYSTEM
+-- KEY PERSISTENCE SYSTEM (Fixed Line 32)
 local keyFile = "UniversalHub_v2_Key.txt"
 local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
+local keyExists = false
 
-if readfileexists(keyFile) then
-    local savedKey = readfile(keyFile)
-    if savedKey == CORRECT_KEY then
-        db.Verified.Value = true
+-- Safe Check for File System (Prevents Crash)
+pcall(function()
+    if readfileexists and readfileexists(keyFile) then
+        keyExists = true
+    elseif isfile and isfile(keyFile) then
+        keyExists = true
     end
+end)
+
+if keyExists then
+    pcall(function()
+        local savedKey = readfile(keyFile)
+        if savedKey == CORRECT_KEY then
+            db.Verified.Value = true
+        end
+    end)
 end
 
+-- If not verified, show the UI
 if not db.Verified.Value then
     local screenGui = Instance.new("ScreenGui", pg)
+    screenGui.Name = "KeyGui_v2"
+
     local keyFrame = Instance.new("Frame", screenGui)
     keyFrame.Size = UDim2.new(0, 280, 0, 180)
     keyFrame.Position = UDim2.new(0.5, -140, 0.5, -90)
@@ -69,7 +84,7 @@ if not db.Verified.Value then
 
     btn.MouseButton1Click:Connect(function()
         if input.Text == CORRECT_KEY then
-            writefile(keyFile, CORRECT_KEY)
+            pcall(function() writefile(keyFile, CORRECT_KEY) end)
             db.Verified.Value = true
             screenGui:Destroy()
         else
