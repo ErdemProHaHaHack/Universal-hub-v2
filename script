@@ -1,348 +1,231 @@
---[[ 
-    UNIVERSAL HUB V2 - BÖLÜM 1
---]]
-
-local Player = game.Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-
--- AYARLAR VE ÇEVİRİLER
-local Langs = {
-	["TR"] = {
-		["Welcome"] = "UNIVERSAL HUB V2",
-		["EnterKey"] = "Anahtarı Giriniz:",
-		["WrongKey"] = "Hatalı Anahtar!",
-		["CorrectKey"] = "Giriş Başarılı!",
-		["SelectLang"] = "Dil Seçiniz",
-		["SelectDev"] = "Cihaz Seçiniz",
-		["PC"] = "Bilgisayar",
-		["Mobile"] = "Mobil",
-		["Fly"] = "Uçuş",
-		["Noclip"] = "Duvar Geçme",
-		["InfJump"] = "Sınırsız Zıplama",
-		["ESP"] = "Oyuncu Takibi",
-		["GodMode"] = "Ölümsüzlük",
-		["Speed"] = "Hız: 100",
-		["Jump"] = "Süper Zıplama",
-		["Reset"] = "Sıfırla",
-		["CloseHint"] = "Menü Kapalı. Açmak için 'L' tuşuna bas!",
-		["Dev"] = "Geliştirici: Owner"
-	},
-	["EN"] = {
-		["Welcome"] = "UNIVERSAL HUB V2",
-		["EnterKey"] = "Enter Key:",
-		["WrongKey"] = "Wrong Key!",
-		["CorrectKey"] = "Access Granted!",
-		["SelectLang"] = "Select Language",
-		["SelectDev"] = "Select Device",
-		["PC"] = "PC",
-		["Mobile"] = "Mobile",
-		["Fly"] = "Fly",
-		["Noclip"] = "Noclip",
-		["InfJump"] = "Infinite Jump",
-		["ESP"] = "ESP",
-		["GodMode"] = "God Mode",
-		["Speed"] = "Speed: 100",
-		["Jump"] = "Super Jump",
-		["Reset"] = "Reset",
-		["CloseHint"] = "Menu Closed. Press 'L' to open!",
-		["Dev"] = "Developer: Owner"
-	}
+-- [[ PART 1: SETUP & KEY SYSTEM ]] --
+_G.HubSettings = {
+    FlySpeed = 50,
+    WalkSpeed = 16,
+    JumpPower = 50,
+    IsFlying = false,
+    Noclip = false,
+    InfJump = false,
+    ESP = false
 }
 
-local CurrentLang = "TR"
-local CorrectKey = "woahmyuniversalscriptissoopv2"
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "UniversalHub_V2"
+screenGui.ResetOnSpawn = false
 
--- GUI ANA YAPI
-local ScreenGui = Instance.new("ScreenGui", Player.PlayerGui)
-ScreenGui.Name = "UniversalHubV2"
-ScreenGui.ResetOnSpawn = false
+local keyFrame = Instance.new("Frame", screenGui)
+keyFrame.Size = UDim2.new(0, 250, 0, 150)
+keyFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
+keyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keyFrame.BorderSizePixel = 0
 
-local function makeSquircle(obj)
-	local corner = Instance.new("UICorner", obj)
-	corner.CornerRadius = UDim.new(0, 12)
+local keyTitle = Instance.new("TextLabel", keyFrame)
+keyTitle.Size = UDim2.new(1, 0, 0, 40)
+keyTitle.Text = "ENTER KEY TO ACCESS"
+keyTitle.TextColor3 = Color3.new(1, 1, 1)
+keyTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+local keyInput = Instance.new("TextBox", keyFrame)
+keyInput.Size = UDim2.new(0.8, 0, 0, 30)
+keyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
+keyInput.PlaceholderText = "Key here..."
+keyInput.Text = ""
+keyInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+keyInput.TextColor3 = Color3.new(1, 1, 1)
+
+local verifyBtn = Instance.new("TextButton", keyFrame)
+verifyBtn.Size = UDim2.new(0.8, 0, 0, 30)
+verifyBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+verifyBtn.Text = "Verify"
+verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+verifyBtn.TextColor3 = Color3.new(1, 1, 1)
+
+verifyBtn.MouseButton1Click:Connect(function()
+    if keyInput.Text == "woahmyuniversalscriptissoopv2" then
+        keyFrame:Destroy()
+        _G.KeyVerified = true
+        print("Key Verified! Now execute Part 2.")
+    else
+        verifyBtn.Text = "Wrong Key!"
+        task.wait(1)
+        verifyBtn.Text = "Verify"
+    end
+end)
+-- [[ PART 2: INTERFACE & INPUTS ]] --
+if not _G.KeyVerified then print("Please execute Part 1 first!") return end
+
+local player = game.Players.LocalPlayer
+local screenGui = player.PlayerGui:WaitForChild("UniversalHub_V2")
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 200, 0, 400)
+mainFrame.Position = UDim2.new(0.8, 0, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "Universal Hub v2"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+local scroll = Instance.new("ScrollingFrame", mainFrame)
+scroll.Size = UDim2.new(1, 0, 1, -40)
+scroll.Position = UDim2.new(0, 0, 0, 40)
+scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
+scroll.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+scroll.BorderSizePixel = 0
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- SPEED INPUT BOXES
+local function createInput(text, default, callback)
+    local container = Instance.new("Frame", scroll)
+    container.Size = UDim2.new(0.9, 0, 0, 40)
+    container.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", container)
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.Text = text
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.BackgroundTransparency = 1
+
+    local input = Instance.new("TextBox", container)
+    input.Size = UDim2.new(0.4, 0, 0.8, 0)
+    input.Position = UDim2.new(0.5, 0, 0.1, 0)
+    input.Text = tostring(default)
+    input.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    input.TextColor3 = Color3.new(1, 1, 1)
+    
+    input.FocusLost:Connect(function()
+        callback(tonumber(input.Text))
+    end)
 end
 
--- 1. KEY EKRANI
-local KeyFrame = Instance.new("Frame", ScreenGui)
-KeyFrame.Size = UDim2.new(0, 300, 0, 200)
-KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-KeyFrame.BorderSizePixel = 0
-makeSquircle(KeyFrame)
+createInput("Fly Speed:", 50, function(v) _G.HubSettings.FlySpeed = v or 50 end)
+createInput("Walk Speed:", 16, function(v) _G.HubSettings.WalkSpeed = v or 16 end)
+createInput("Jump Power:", 50, function(v) _G.HubSettings.JumpPower = v or 50 end)
 
-local KeyTitle = Instance.new("TextLabel", KeyFrame)
-KeyTitle.Size = UDim2.new(1, 0, 0, 50)
-KeyTitle.Text = Langs[CurrentLang]["Welcome"]
-KeyTitle.TextColor3 = Color3.new(1, 1, 1)
-KeyTitle.BackgroundTransparency = 1
-KeyTitle.Font = Enum.Font.GothamBold
-KeyTitle.TextSize = 20
-
-local KeyInput = Instance.new("TextBox", KeyFrame)
-KeyInput.Size = UDim2.new(0.8, 0, 0, 40)
-KeyInput.Position = UDim2.new(0.1, 0, 0.3, 0)
-KeyInput.PlaceholderText = Langs[CurrentLang]["EnterKey"]
-KeyInput.Text = ""
-KeyInput.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-KeyInput.TextColor3 = Color3.new(1, 1, 1)
-makeSquircle(KeyInput)
-
-local KeySubmit = Instance.new("TextButton", KeyFrame)
-KeySubmit.Size = UDim2.new(0.8, 0, 0, 40)
-KeySubmit.Position = UDim2.new(0.1, 0, 0.6, 0)
-KeySubmit.Text = "Giriş Yap"
-KeySubmit.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-KeySubmit.TextColor3 = Color3.new(1, 1, 1)
-KeySubmit.Font = Enum.Font.GothamBold
-makeSquircle(KeySubmit)
-
--- 2. DİL VE CİHAZ SEÇİM EKRANI
-local SetupFrame = Instance.new("Frame", ScreenGui)
-SetupFrame.Size = UDim2.new(0, 300, 0, 250)
-SetupFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
-SetupFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-SetupFrame.Visible = false
-makeSquircle(SetupFrame)
-
--- 3. ANA PANEL
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 260, 0, 380)
-MainFrame.Position = UDim2.new(0.4, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-MainFrame.Visible = false
-MainFrame.Active = true
-MainFrame.Draggable = true
-makeSquircle(MainFrame)
-
-local MainTitle = Instance.new("TextLabel", MainFrame)
-MainTitle.Size = UDim2.new(1, 0, 0, 45)
-MainTitle.Text = "UNIVERSAL HUB V2"
-MainTitle.TextColor3 = Color3.new(1, 1, 1)
-MainTitle.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-MainTitle.Font = Enum.Font.GothamBold
-makeSquircle(MainTitle)
-
-local Scroll = Instance.new("ScrollingFrame", MainFrame)
-Scroll.Size = UDim2.new(1, -20, 1, -60)
-Scroll.Position = UDim2.new(0, 10, 0, 55)
-Scroll.BackgroundTransparency = 1
-Scroll.CanvasSize = UDim2.new(0, 0, 1.5, 0)
-Scroll.ScrollBarThickness = 2
-
-local Layout = Instance.new("UIListLayout", Scroll)
-Layout.Padding = UDim.new(0, 8)
-Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-local MinBtn = Instance.new("TextButton", MainFrame)
-MinBtn.Size = UDim2.new(0, 30, 0, 30)
-MinBtn.Position = UDim2.new(1, -35, 0, 5)
-MinBtn.Text = "-"
-MinBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-MinBtn.TextColor3 = Color3.new(1, 1, 1)
-makeSquircle(MinBtn)
-
-local InfoLabel = Instance.new("TextLabel", ScreenGui)
-InfoLabel.Size = UDim2.new(0, 300, 0, 40)
-InfoLabel.Position = UDim2.new(0.5, -150, 0.1, 0)
-InfoLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-InfoLabel.TextColor3 = Color3.new(1, 1, 1)
-InfoLabel.Text = ""
-InfoLabel.Visible = false
-InfoLabel.Font = Enum.Font.Gotham
-makeSquircle(InfoLabel)
-
-local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0, 50, 0, 50)
-OpenBtn.Position = UDim2.new(0, 20, 0.5, -25)
-OpenBtn.Text = "HUB"
-OpenBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-OpenBtn.TextColor3 = Color3.new(1, 1, 1)
-OpenBtn.Visible = false
-makeSquircle(OpenBtn)
---[[ 
-    UNIVERSAL HUB V2 - BÖLÜM 2
---]]
-
--- İkon Animasyonu
-task.spawn(function()
-	while true do
-		TweenService:Create(OpenBtn, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 60, 0, 60), Position = UDim2.new(0, 15, 0.5, -30)}):Play()
-		task.wait(1)
-		TweenService:Create(OpenBtn, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0, 50, 0, 50), Position = UDim2.new(0, 20, 0.5, -25)}):Play()
-		task.wait(1)
-	end
-end)
-
-local function createSetupBtn(text, pos, color, callback)
-	local btn = Instance.new("TextButton", SetupFrame)
-	btn.Size = UDim2.new(0.8, 0, 0, 40)
-	btn.Position = pos
-	btn.Text = text
-	btn.BackgroundColor3 = color
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.Font = Enum.Font.Gotham
-	makeSquircle(btn)
-	btn.MouseButton1Click:Connect(callback)
+-- BUTTON HELPER
+_G.CreateBtn = function(text, callback)
+    local btn = Instance.new("TextButton", scroll)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.MouseButton1Click:Connect(callback)
 end
+-- [[ PART 3: FEATURES LOGIC ]] --
+if not _G.CreateBtn then print("Please execute Part 1 and 2 first!") return end
 
-local function createMainBtn(textKey, color, callback)
-	local btn = Instance.new("TextButton", Scroll)
-	btn.Size = UDim2.new(0.9, 0, 0, 38)
-	btn.Text = Langs[CurrentLang][textKey] or textKey
-	btn.BackgroundColor3 = color
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.Font = Enum.Font.Gotham
-	makeSquircle(btn)
-	btn.MouseButton1Click:Connect(callback)
-	return btn
-end
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
--- ÖZELLİKLER
-local flying = false
-local flyBtn = createMainBtn("Fly", Color3.fromRGB(60, 60, 70), function() end)
-flyBtn.MouseButton1Click:Connect(function()
-	flying = not flying
-	flyBtn.Text = flying and "Fly: ON" or Langs[CurrentLang]["Fly"]
-	flyBtn.BackgroundColor3 = flying and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 70)
-	local char = Player.Character
-	local root = char:WaitForChild("HumanoidRootPart")
-	if flying then
-		local bv = Instance.new("BodyVelocity", root)
-		bv.Name = "FlyBV"
-		bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-		local bg = Instance.new("BodyGyro", root)
-		bg.Name = "FlyBG"
-		bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-		task.spawn(function()
-			while flying do
-				bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 70
-				bg.CFrame = workspace.CurrentCamera.CFrame
-				task.wait()
-			end
-			bv:Destroy() bg:Destroy()
-		end)
-	end
+-- 1. Fly
+_G.CreateBtn("Fly (Toggle)", function()
+    _G.HubSettings.IsFlying = not _G.HubSettings.IsFlying
+    local char = player.Character
+    if _G.HubSettings.IsFlying then
+        local bv = Instance.new("BodyVelocity", char.HumanoidRootPart)
+        bv.Name = "FlyBV"
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        local bg = Instance.new("BodyGyro", char.HumanoidRootPart)
+        bg.Name = "FlyBG"
+        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        char.Humanoid.PlatformStand = true
+    else
+        if char.HumanoidRootPart:FindFirstChild("FlyBV") then char.HumanoidRootPart.FlyBV:Destroy() end
+        if char.HumanoidRootPart:FindFirstChild("FlyBG") then char.HumanoidRootPart.FlyBG:Destroy() end
+        char.Humanoid.PlatformStand = false
+    end
 end)
 
-local noclip = false
-local noclipBtn = createMainBtn("Noclip", Color3.fromRGB(60, 60, 70), function() end)
-noclipBtn.MouseButton1Click:Connect(function()
-	noclip = not noclip
-	noclipBtn.Text = noclip and "Noclip: ON" or Langs[CurrentLang]["Noclip"]
-	noclipBtn.BackgroundColor3 = noclip and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 70)
-end)
-RunService.Stepped:Connect(function()
-	if noclip then
-		for _, v in pairs(Player.Character:GetDescendants()) do
-			if v:IsA("BasePart") then v.CanCollide = false end
-		end
-	end
+-- 2. Noclip
+_G.CreateBtn("Noclip (Toggle)", function()
+    _G.HubSettings.Noclip = not _G.HubSettings.Noclip
 end)
 
-local infjump = false
-local ijBtn = createMainBtn("InfJump", Color3.fromRGB(60, 60, 70), function() end)
-ijBtn.MouseButton1Click:Connect(function()
-	infjump = not infjump
-	ijBtn.Text = infjump and "InfJump: ON" or Langs[CurrentLang]["InfJump"]
-	ijBtn.BackgroundColor3 = infjump and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 70)
-end)
-UserInputService.JumpRequest:Connect(function()
-	if infjump then Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
+-- 3. Infinite Jump
+_G.CreateBtn("Inf Jump (Toggle)", function()
+    _G.HubSettings.InfJump = not _G.HubSettings.InfJump
 end)
 
-local esp = false
-local espBtn = createMainBtn("ESP", Color3.fromRGB(60, 60, 70), function() end)
-espBtn.MouseButton1Click:Connect(function()
-	esp = not esp
-	espBtn.Text = esp and "ESP: ON" or Langs[CurrentLang]["ESP"]
-	espBtn.BackgroundColor3 = esp and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 70)
+-- 4. ESP (Simple)
+_G.CreateBtn("ESP (Toggle)", function()
+    _G.HubSettings.ESP = not _G.HubSettings.ESP
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            if _G.HubSettings.ESP then
+                Instance.new("Highlight", p.Character).FillColor = Color3.new(1,0,0)
+            else
+                for _, v in pairs(p.Character:GetChildren()) do if v:IsA("Highlight") then v:Destroy() end end
+            end
+        end
+    end
 end)
+
+-- 5. Apply WalkSpeed
+_G.CreateBtn("Set WalkSpeed", function()
+    player.Character.Humanoid.WalkSpeed = _G.HubSettings.WalkSpeed
+end)
+
+-- 6. Apply JumpPower
+_G.CreateBtn("Set JumpPower", function()
+    player.Character.Humanoid.UseJumpPower = true
+    player.Character.Humanoid.JumpPower = _G.HubSettings.JumpPower
+end)
+
+-- 7. Low Gravity
+_G.CreateBtn("Low Gravity", function()
+    game.Workspace.Gravity = 50
+end)
+
+-- 8. Normal Gravity
+_G.CreateBtn("Normal Gravity", function()
+    game.Workspace.Gravity = 196.2
+end)
+
+-- 9. Fullbright (Removes darkness)
+_G.CreateBtn("Fullbright", function()
+    game:GetService("Lighting").Brightness = 2
+    game:GetService("Lighting").ClockTime = 14
+    game:GetService("Lighting").FogEnd = 100000
+end)
+
+-- 10. FOV Zoom Out
+_G.CreateBtn("Wide FOV", function()
+    game.Workspace.CurrentCamera.FieldOfView = 100
+end)
+
+-- BACKGROUND LOOPS
 RunService.RenderStepped:Connect(function()
-	if esp then
-		for _, p in pairs(game.Players:GetPlayers()) do
-			if p ~= Player and p.Character then
-				if not p.Character:FindFirstChild("HubHighlight") then
-					local h = Instance.new("Highlight", p.Character)
-					h.Name = "HubHighlight"
-					h.FillColor = Color3.new(1, 0, 0)
-				end
-			end
-		end
-	end
+    local char = player.Character
+    if not char then return end
+    
+    if _G.HubSettings.IsFlying then
+        local root = char:FindFirstChild("HumanoidRootPart")
+        local bv = root:FindFirstChild("FlyBV")
+        local bg = root:FindFirstChild("FlyBG")
+        if bv and bg then
+            local cam = workspace.CurrentCamera
+            bv.Velocity = cam.CFrame.LookVector * _G.HubSettings.FlySpeed
+            bg.CFrame = cam.CFrame
+        end
+    end
+    
+    if _G.HubSettings.Noclip then
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
 end)
 
-createMainBtn("Speed", Color3.fromRGB(0, 120, 215), function() Player.Character.Humanoid.WalkSpeed = 100 end)
-createMainBtn("Jump", Color3.fromRGB(0, 150, 0), function() Player.Character.Humanoid.JumpPower = 150 end)
-createMainBtn("Reset", Color3.fromRGB(150, 0, 0), function() 
-	Player.Character.Humanoid.WalkSpeed = 16 
-	Player.Character.Humanoid.JumpPower = 50 
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.HubSettings.InfJump then
+        player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
 end)
-
--- LOGIC
-KeySubmit.MouseButton1Click:Connect(function()
-	if KeyInput.Text == CorrectKey then
-		KeyTitle.Text = Langs[CurrentLang]["CorrectKey"]
-		KeySubmit.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-		task.wait(1)
-		KeyFrame.Visible = false
-		SetupFrame.Visible = true
-	else
-		KeyTitle.Text = Langs[CurrentLang]["WrongKey"]
-		KeySubmit.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-		task.wait(1)
-		KeyTitle.Text = Langs[CurrentLang]["Welcome"]
-		KeySubmit.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-	end
-end)
-
-createSetupBtn("Türkçe / TR", UDim2.new(0.1, 0, 0.2, 0), Color3.fromRGB(50, 50, 60), function()
-	CurrentLang = "TR"
-	MainTitle.Text = "UNIVERSAL HUB V2"
-	SetupFrame.Visible = false
-	MainFrame.Visible = true
-	OpenBtn.Visible = true
-end)
-
-createSetupBtn("English / EN", UDim2.new(0.1, 0, 0.35, 0), Color3.fromRGB(50, 50, 60), function()
-	CurrentLang = "EN"
-	SetupFrame.Visible = false
-	MainFrame.Visible = true
-	OpenBtn.Visible = true
-end)
-
-createSetupBtn(Langs[CurrentLang]["PC"], UDim2.new(0.1, 0, 0.6, 0), Color3.fromRGB(80, 0, 150), function()
-	SetupFrame.Visible = false
-	MainFrame.Visible = true
-	OpenBtn.Visible = false
-end)
-
-createSetupBtn(Langs[CurrentLang]["Mobile"], UDim2.new(0.1, 0, 0.75, 0), Color3.fromRGB(0, 150, 150), function()
-	SetupFrame.Visible = false
-	MainFrame.Visible = true
-	OpenBtn.Visible = true
-end)
-
-MinBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = false
-	InfoLabel.Text = Langs[CurrentLang]["CloseHint"]
-	InfoLabel.Visible = true
-	task.wait(3)
-	InfoLabel.Visible = false
-end)
-
-local function toggleMain()
-	MainFrame.Visible = not MainFrame.Visible
-	if MainFrame.Visible then InfoLabel.Visible = false end
-end
-
-OpenBtn.MouseButton1Click:Connect(toggleMain)
-UserInputService.InputBegan:Connect(function(input, processed)
-	if not processed and input.KeyCode == Enum.KeyCode.L then
-		toggleMain()
-	end
-end)
-
-print("Universal Hub V2 Loaded Successfully!")
