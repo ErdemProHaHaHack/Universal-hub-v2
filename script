@@ -1,7 +1,7 @@
--- [[ UNIVERSAL HUB v2 - ORION STABLE EDITION ]] --
+-- [[ UNIVERSAL HUB v2 - FLUENT ULTIMATE COMPATIBILITY ]] --
 
 -- ==========================================
--- 1. GÜVENLİ KEY SİSTEMİ (Sistemi Dondurmaz)
+-- 1. KEY SYSTEM (Load First)
 -- ==========================================
 local player = game.Players.LocalPlayer
 local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
@@ -25,7 +25,7 @@ if not verified then
     title.Size = UDim2.new(1, 0, 0, 50); title.Text = "UNIVERSAL HUB v2"; title.TextColor3 = Color3.new(1,1,1); title.BackgroundColor3 = Color3.fromRGB(30,30,30); Instance.new("UICorner", title)
     
     local input = Instance.new("TextBox", frame)
-    input.Size = UDim2.new(0.8, 0, 0, 40); input.Position = UDim2.new(0.1, 0, 0.35, 0); input.PlaceholderText = "Enter Key..."; input.BackgroundColor3 = Color3.fromRGB(40,40,40); input.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", input)
+    input.Size = UDim2.new(0.8, 0, 0, 40); input.Position = UDim2.new(0.1, 0, 0.35, 0); input.PlaceholderText = "Key..."; input.BackgroundColor3 = Color3.fromRGB(40,40,40); input.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", input)
     
     local btn = Instance.new("TextButton", frame)
     btn.Size = UDim2.new(0.8, 0, 0, 40); btn.Position = UDim2.new(0.1, 0, 0.65, 0); btn.Text = "Verify"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215); btn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", btn)
@@ -33,7 +33,7 @@ if not verified then
     btn.MouseButton1Click:Connect(function()
         if input.Text == CORRECT_KEY then
             pcall(function() writefile(keyFile, CORRECT_KEY) end)
-            btn.Text = "Verified! Rejoin now."
+            btn.Text = "Verified! Rejoin Now."
             task.wait(2); screenGui:Destroy()
             while true do task.wait(1) end
         else
@@ -44,21 +44,31 @@ if not verified then
 end
 
 -- ==========================================
--- 2. ORION LIB YÜKLEME
+-- 2. FLUENT LOADING (Safe Load)
 -- ==========================================
-local OrionLib = loadstring(game:HttpGet('https://retextcolor.github.io/Orion/Lib'))()
-local Window = OrionLib:MakeWindow({
-    Name = "Universal Hub v2", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "UniversalHubV2"
+local Fluent;
+local success, err = pcall(function()
+    Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+end)
+
+if not success or not Fluent then
+    -- Eğer Fluent yüklenemezse hata verme, basit bir uyarı çıkar
+    warn("Fluent failed to load: " .. tostring(err))
+    return
+end
+
+-- WINDOW (En Sade Ayarlar - 'X' Hatasını Önlemek İçin)
+local Window = Fluent:CreateWindow({
+    Title = "Universal Hub v2",
+    SubTitle = "Ultimate Stable",
+    TabWidth = 160,
 })
 
 -- ==========================================
--- 3. MOBILE TOGGLE ICON (Sürüklenebilir)
+-- 3. MOBILE TOGGLE ICON
 -- ==========================================
 local ToggleGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-ToggleGui.Name = "OrionMobileToggle"; ToggleGui.ResetOnSpawn = false
+ToggleGui.Name = "FluentToggle"; ToggleGui.ResetOnSpawn = false
 
 local OpenBtn = Instance.new("TextButton", ToggleGui)
 OpenBtn.Size = UDim2.new(0, 50, 0, 50); OpenBtn.Position = UDim2.new(0.8, 0, 0.2, 0)
@@ -83,13 +93,12 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
 end)
 
 OpenBtn.MouseButton1Click:Connect(function()
-    -- Orion UI'ı gizle/göster
-    local orionGui = player.PlayerGui:FindFirstChild("Orion") or game:GetService("CoreGui"):FindFirstChild("Orion")
-    if orionGui then orionGui.Enabled = not orionGui.Enabled end
+    local fGui = player.PlayerGui:FindFirstChild("Fluent") or game:GetService("CoreGui"):FindFirstChild("Fluent")
+    if fGui then fGui.Enabled = not fGui.Enabled end
 end)
 
 -- ==========================================
--- 4. STATE & SETTINGS
+-- 4. STATE & ENGINE
 -- ==========================================
 local Settings = {
     Fly = false, Noclip = false, InfJump = false, ESP = false,
@@ -121,79 +130,27 @@ local function getClosestTarget()
 end
 
 -- ==========================================
--- 5. UI TABS
+-- 5. TABS & ELEMENTS
 -- ==========================================
-local MainTab = Window:MakeTab({ Name = "Main", Icon = "user" })
-local SetTab = Window:MakeTab({ Name = "Settings", Icon = "settings" })
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "user" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
 
-MainTab:AddToggle({
-    Name = "HD Fly (Stiff Pose)",
-    Default = false,
-    Callback = function(v) Settings.Fly = v end
-})
+Tabs.Main:AddToggle("FlyT", {Title = "HD Fly (Stiff)", Default = false, Callback = function(v) Settings.Fly = v end})
+Tabs.Main:AddToggle("NoclipT", {Title = "Noclip", Default = false, Callback = function(v) Settings.Noclip = v end})
+Tabs.Main:AddToggle("JumpT", {Title = "Inf Jump", Default = false, Callback = function(v) Settings.InfJump = v end})
+Tabs.Main:AddToggle("AimT", {Title = "Aimbot (Bots+Pl)", Default = false, Callback = function(v) Settings.Aimbot = v end})
+Tabs.Main:AddToggle("ESPT", {Title = "ESP", Default = false, Callback = function(v) Settings.ESP = v end})
+Tabs.Main:AddToggle("SpeedT", {Title = "Speed Hack", Default = false, Callback = function(v) Settings.SpeedH = v end})
+Tabs.Main:AddToggle("JumpT2", {Title = "Jump Hack", Default = false, Callback = function(v) Settings.JumpH = v end})
 
-MainTab:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(v) Settings.Noclip = v end
-})
-
-MainTab:AddToggle({
-    Name = "Infinite Jump",
-    Default = false,
-    Callback = function(v) Settings.InfJump = v end
-})
-
-MainTab:AddToggle({
-    Name = "Aimbot (Bots+Players)",
-    Default = false,
-    Callback = function(v) Settings.Aimbot = v end
-})
-
-MainTab:AddToggle({
-    Name = "Player ESP",
-    Default = false,
-    Callback = function(v) Settings.ESP = v end
-})
-
-MainTab:AddToggle({
-    Name = "Enable Speed Hack",
-    Default = false,
-    Callback = function(v) Settings.SpeedH = v end
-})
-
-MainTab:AddToggle({
-    Name = "Enable Jump Hack",
-    Default = false,
-    Callback = function(v) Settings.JumpH = v end
-})
-
-SetTab:AddSlider({
-    Name = "Fly Speed",
-    Min = 10, Max = 300, Default = 50,
-    Color = Color3.fromRGB(0, 120, 215),
-    Increment = 1,
-    Callback = function(v) Settings.FlySpeed = v end
-})
-
-SetTab:AddSlider({
-    Name = "Walk Speed",
-    Min = 16, Max = 500, Default = 50,
-    Color = Color3.fromRGB(0, 120, 215),
-    Increment = 1,
-    Callback = function(v) Settings.WalkSpeed = v end
-})
-
-SetTab:AddSlider({
-    Name = "Jump Power",
-    Min = 50, Max = 1000, Default = 100,
-    Color = Color3.fromRGB(0, 120, 215),
-    Increment = 1,
-    Callback = function(v) Settings.JumpPower = v end
-})
+Tabs.Settings:AddSlider("FlyS", {Title = "Fly Speed", Default = 50, Min = 10, Max = 300, Rounding = 1, Callback = function(v) Settings.FlySpeed = v end})
+Tabs.Settings:AddSlider("WalkS", {Title = "Walk Speed", Default = 50, Min = 16, Max = 500, Rounding = 1, Callback = function(v) Settings.WalkSpeed = v end})
+Tabs.Settings:AddSlider("JumpS", {Title = "Jump Power", Default = 100, Min = 50, Max = 1000, Rounding = 1, Callback = function(v) Settings.JumpPower = v end})
 
 -- ==========================================
--- 6. THE ENGINE (Sıfır Donma Garantili)
+-- 6. ENGINE LOOP (Async & Safe)
 -- ==========================================
 task.spawn(function()
     game:GetService("RunService").Heartbeat:Connect(function()
@@ -252,4 +209,4 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     pcall(function() if Settings.InfJump then getChar():FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
 end)
 
-OrionLib:Init()
+Window:SelectTab(1)
