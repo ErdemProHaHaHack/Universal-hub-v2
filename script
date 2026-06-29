@@ -1,7 +1,14 @@
--- [[ UNIVERSAL HUB v2 - FLUENT ULTIMATE COMPATIBILITY ]] --
+-- [[ UNIVERSAL HUB v2 - DELTA OPTIMIZED FLUENT ]] --
 
 -- ==========================================
--- 1. KEY SYSTEM (Load First)
+-- 0. DELTA COMPATIBILITY PATCH
+-- ==========================================
+-- Bazı executorlar Fluent'in beklediği fonksiyonları eksik sağlar, onları burada tanımlıyoruz.
+if not setclipboard then setclipboard = function(t) print("Clipboard: " .. t) end end
+if not getgenv then getgenv = function() return _G end end
+
+-- ==========================================
+-- 1. KEY SYSTEM (Persistence)
 -- ==========================================
 local player = game.Players.LocalPlayer
 local CORRECT_KEY = "woahmyuniversalscriptissoopv2"
@@ -44,32 +51,39 @@ if not verified then
 end
 
 -- ==========================================
--- 2. FLUENT LOADING (Safe Load)
+-- 2. FLUENT LOADING (Safe Sequence)
 -- ==========================================
-local Fluent;
+local Fluent
 local success, err = pcall(function()
     Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 end)
 
-if not success or not Fluent then
-    -- Eğer Fluent yüklenemezse hata verme, basit bir uyarı çıkar
-    warn("Fluent failed to load: " .. tostring(err))
+if not success then
+    warn("Fluent loading error: " .. tostring(err))
     return
 end
 
--- WINDOW (En Sade Ayarlar - 'X' Hatasını Önlemek İçin)
-local Window = Fluent:CreateWindow({
-    Title = "Universal Hub v2",
-    SubTitle = "Ultimate Stable",
-    TabWidth = 160,
-})
+-- Delta'da 'X' hatasını önlemek için kısa bir bekleme ve pcall kullanımı
+task.wait(0.5)
+local Window
+local windowSuccess, windowErr = pcall(function()
+    Window = Fluent:CreateWindow({
+        Title = "Universal Hub v2",
+        SubTitle = "Delta Optimized",
+        TabWidth = 160,
+    })
+end)
+
+if not windowSuccess then
+    warn("CreateWindow Error: " .. tostring(windowErr))
+    return
+end
 
 -- ==========================================
 -- 3. MOBILE TOGGLE ICON
 -- ==========================================
 local ToggleGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-ToggleGui.Name = "FluentToggle"; ToggleGui.ResetOnSpawn = false
-
+ToggleGui.Name = "FluentMobileToggle"; ToggleGui.ResetOnSpawn = false
 local OpenBtn = Instance.new("TextButton", ToggleGui)
 OpenBtn.Size = UDim2.new(0, 50, 0, 50); OpenBtn.Position = UDim2.new(0.8, 0, 0.2, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); OpenBtn.Text = "v2"; OpenBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -150,7 +164,7 @@ Tabs.Settings:AddSlider("WalkS", {Title = "Walk Speed", Default = 50, Min = 16, 
 Tabs.Settings:AddSlider("JumpS", {Title = "Jump Power", Default = 100, Min = 50, Max = 1000, Rounding = 1, Callback = function(v) Settings.JumpPower = v end})
 
 -- ==========================================
--- 6. ENGINE LOOP (Async & Safe)
+-- 6. ENGINE LOOP (Safe Heartbeat)
 -- ==========================================
 task.spawn(function()
     game:GetService("RunService").Heartbeat:Connect(function()
